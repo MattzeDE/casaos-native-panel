@@ -70,3 +70,8 @@ func shellOut(name string, args ...string) (string, error) {
 	}
 	return strings.TrimSpace(string(out)), nil
 }
+
+// GetMetrics returns empty/default metrics for Docker mode (not applicable here).
+func (d *DockerRuntime) GetMetrics() (Metrics, error) {
+	return Metrics{}, nil
+}

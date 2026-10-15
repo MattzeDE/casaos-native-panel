@@ -18,6 +18,7 @@ type Runtime interface {
 	GetGroups() ([]Group, error)
 	GetSambaConfig() (string, error)
 	SaveSambaConfig(content string) error
+	GetMetrics() (Metrics, error)
 }
 
 type Overview struct {
@@ -50,6 +51,21 @@ type User struct {
 type Group struct {
 	Name    string   `json:"name"`
 	Members []string `json:"members,omitempty"`
+}
+
+// Metrics represent system metrics for dashboard display.
+type Metrics struct {
+	Load1          float64 `json:"load1"`
+	Load5          float64 `json:"load5"`
+	Load15         float64 `json:"load15"`
+	MemTotalKB     int64   `json:"mem_total_kb"`
+	MemAvailableKB int64   `json:"mem_available_kb"`
+	DiskTotalBytes uint64  `json:"disk_total_bytes"`
+	DiskFreeBytes  uint64  `json:"disk_free_bytes"`
+	DiskUsedPct    float64 `json:"disk_used_percent"`
+	NetRxBytes     uint64  `json:"net_rx_bytes"`
+	NetTxBytes     uint64  `json:"net_tx_bytes"`
+	UptimeSeconds  float64 `json:"uptime_seconds"`
 }
 
 func New(mode string) (Runtime, error) {
