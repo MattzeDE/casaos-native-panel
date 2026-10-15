@@ -27,6 +27,8 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/api/v1/users", s.handleUsers)
 	mux.HandleFunc("/api/v1/groups", s.handleGroups)
 	mux.HandleFunc("/api/v1/samba/config", s.handleSambaConfig)
+	mux.HandleFunc("/api/v1/dashboard", s.handleDashboard)
+	mux.HandleFunc("/api/v1/system/jobs", s.handleJobs)
 	mux.HandleFunc("/", s.handleRoot)
 	return mux
 }
@@ -130,10 +132,22 @@ func (s *Server) handleSambaConfig(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if err := s.runtime.SaveSambaConfig(payload.Content); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			status := http.StatusInternalServerError
+			if strings.Contains(err.Error(), "testparm") || strings.Contains(err.Error(), "validation failed") {
+				status = http.StatusBadRequest
+			}
+			w.WriteHeader(status)
+			_ = json.NewEncoder(w).Encode(response{
+				"error": err.Error(),
+				"message": "Samba config validation failed and was not applied.",
+			})
 			return
 		}
 		w.WriteHeader(http.StatusAccepted)
 		_ = json.NewEncoder(w).Encode(response{"status": "saved"})
 	}
+}
+
+func (s *Server) handleJobs(w http.ResponseWriter, r *http.Request) {
+	_ = json.NewEncoder(w).Encode(response{"jobs": []any{}})
 }
